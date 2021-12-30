@@ -1,12 +1,17 @@
 from django.shortcuts import render
 from django.views.generic import ListView
-from .models import Post
+from django.views.generic import DetailView
+from .models import Post #지금 있는 폴더에 models.py에서 Post 함수를 가져온다.
 
 class PostList(ListView):
     model = Post
     ordering = '-pk' #CBV로 만든 함수이다. ordering은 제작된 순서로 포스트를 나타낸다.
     #template_name = 'blog/index.html' #템플릿 네임을 post_list.html에서 index.html로 변경한다.
                                       #매소드들이 있는데 그 중에 post_list 변수로 html에서 조작해야 한다.
+
+class PostDetail(DetailView):
+    model = Post
+   # template_name = "blog/single_post_page.html"
 
 def index(request):
     posts = Post.objects.all().order_by('-pk')      #-pk 최신순
@@ -19,7 +24,7 @@ def index(request):
             'posts': posts,   #key값은 내가 html에서 사용할 변수이름이고 posts는 값을 불러들인값을 value로 저장할 변수이다.
         }                       #key: value형식이 아닌 하나의 변수만 보내니 오류가 발생한다.
     )
-
+"""
 def single_post_page(request, pk):
     post = Post.objects.get(pk=pk)  # .get(pk=pk) 괄호 안에 조건이 만족하는 레코드를 가져온다.
 
@@ -30,3 +35,4 @@ def single_post_page(request, pk):
             'post': post,
         }
     )
+    """
