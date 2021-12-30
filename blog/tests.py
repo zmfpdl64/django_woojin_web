@@ -8,11 +8,13 @@ class TextView(TestCase):
 
     def test_post_list(self):
         # 1.1 포스트 목록 페이지를 가져온다.
-        response = self.client.get('/blog/')
+        response = self.client.get('/blog/') #html형식의 /blog/창 출력
+        print('결과출력:',response) #? 왜이렇게 출력되는지 잘 모름
         # 1.2 정상적으로 페이지가 로드된다.
         self.assertEqual(response.status_code, 200)
         # 1.3 페이지 타이틀은 "Blog'이다.
-        soup = BeautifulSoup(response.content, 'html.parser')
+        soup = BeautifulSoup(response.content, 'html.parser') #파싱한결과들을 soup에 저장한다.
+        print('소프결과값',soup)
         self.assertEqual(soup.title.text, 'Blog')
         # 1.4 내비게이션 바가 있다.
         navbar = soup.nav
@@ -34,7 +36,7 @@ class TextView(TestCase):
             title='두 번째 포스트입니다.',
             content='1등이 전부는 아니잖아요?',
         )
-        self.assertEqual(Post.objects.count(), 2)
+        self.assertEqual(Post.objects.count(), 2)   #실제로 생성이 되는지 확인
 
         # 3.2 포스트 목록 페이지를 새로고침했을 때
         response = self.client.get('/blog/')
