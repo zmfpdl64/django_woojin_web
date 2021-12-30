@@ -2,19 +2,53 @@ from django.test import TestCase, Client
 from bs4 import BeautifulSoup
 from .models import Post
 
+
+def test_post_detail(self):
+    #1.1 포스트가 하나 있다.
+    post_001 = Post.objects.create(
+        title='첫 번째 포스트입니다.',
+        content = 'Hello World. we are the world.',
+    )
+    #1.2 그 포스트의 url은 '/blog/1/' 이다.
+    self.assertEqual(post_001.get_absolute_url(), '/blog/1/')
+
+    #2. 첫 번째 포스트의 상세 페이지 테스트
+    #2.1 첫 번째 포스트의 url로 접근하면 정상적으로 작동한다(status code: 200).
+    response = self.client.get(post_001.get_absolute_url())
+    self.assertEqual(response.statuse_code, 200)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    #2.2 포스트 목록 페이지와 똑같은 내비게이션 바가 있다.
+    navbar = soup.nav
+    self.assertIn('Blog', navbar.text)
+    self.assertIn('About Me', navbar.text)
+    #2.3 첫 번째 포스트의 제목이 웹 브라우저 탭 타이틀에 들어 있다.
+    self.assertIn(post_001.title, soup.title.text)
+
+    #2.4 첫 번째 포스트의 제목이 포스트 영역에 있다.
+    main_area = soup.find('div', id='main-area')
+    post_area = main_area.find('div', id='post-area')
+    self.assertIn(post_001.title, post_area.text)
+
+    #2.5 첫 번째 포스트의 작성자(author)가 포스트 영역에 있다.(아직 구현할 수 없음).
+
+    #2.6 첫 번째 포스트의 내용(content)이 포스트 영역에 있다.
+    self.assertIn(post_001.content, post_area.text)
+
+
 class TextView(TestCase):
     def setUp(self):
         self.client = Client()
+    
 
     def test_post_list(self):
         # 1.1 포스트 목록 페이지를 가져온다.
         response = self.client.get('/blog/') #html형식의 /blog/창 출력
-        print('결과출력:',response) #? 왜이렇게 출력되는지 잘 모름
+        #print('결과출력:',response) #? 왜이렇게 출력되는지 잘 모름
         # 1.2 정상적으로 페이지가 로드된다.
         self.assertEqual(response.status_code, 200)
         # 1.3 페이지 타이틀은 "Blog'이다.
         soup = BeautifulSoup(response.content, 'html.parser') #파싱한결과들을 soup에 저장한다.
-        print('소프결과값',soup)
+        #print('소프결과값',soup)
         self.assertEqual(soup.title.text, 'Blog')
         # 1.4 내비게이션 바가 있다.
         navbar = soup.nav
