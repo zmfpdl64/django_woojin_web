@@ -9,6 +9,8 @@
         <meta name="author" content="" />
         <link href="{% static 'blog/bootstrap/bootstrap.min.css' %}" rel="stylesheet" media="screen">
         <link rel="stylesheet" href="{% static 'blog/css/blog-post.css' %}" media="screen">
+        <script src="https://kit.fontawesome.com/6de7fb3e21.js" crossorigin="anonymous"></script>
+       
         <title>{{post.title}}-Blog</title>
         <!-- Favicon-->
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
@@ -49,11 +51,31 @@
                             <a class="badge bg-secondary text-decoration-none link-light" href="#!">Freebies</a>
                         </header>
                         <!-- Preview image figure-->
+                        {% if post.head_image %}
                         <figure class="mb-4"><img class="img-fluid rounded" src="{{ post.head_image.url}}" alt="..." /></figure>
+                        {% else %}
+                        <a href="#!"><img class="card-img-top" src="https://picsum.photos/seed/{{p.id}}/800/200"></a>
+                        {% endif %}
                         <!-- Post content-->
                         <section class="mb-5">
-                            <p>{{post.title}}</p>
+                            <p>{{post.content}}</p>
                         </section>
+                        {% if post.file_upload %}
+                        <a href="{{post.file_upload.url}}" role="button" class="btn btn-primary">
+                            Download:
+
+                            {% if post.get_file_ext == 'csv' %}
+                            <i class="fas fa-file-csv"></i>
+                            {% elif post.get_file_ext == 'xlsx' or post.get_file_ext == 'xls' %}
+                            <i class="far fa-file-powerpoint"></i>
+                            {% elif post.get_file_ext == 'docs' or post.get_file_ext == 'doc' %}
+                            <i class="fas fa-file-signature"></i>
+                            {% else %}
+                            <i class="fas fa-file-upload"></i>
+                            {% endif %}
+                            {{post.get_file_name}}
+                        </a>
+                        {% endif %}
                     </article>
                     <!-- Comments section-->
                     <section class="mb-5">
