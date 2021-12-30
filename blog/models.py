@@ -4,6 +4,7 @@ import os
 class Post(models.Model):
     title = models.CharField(max_length=30)
     content = models.TextField()
+    hook_text = models.CharField(max_length=100, blank=True)
 
     head_image = models.ImageField(upload_to ='blog/images/%Y/%m/%d/', blank=True) #년 월 일로 폴더를 구분해서 접근 시간을 단축시킨다.
     #blank는 비어있어도 경고 없이 실행이 가능하다는 뜻이다.
