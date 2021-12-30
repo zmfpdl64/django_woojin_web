@@ -6,6 +6,7 @@ class Post(models.Model):
 
     head_image = models.ImageField(upload_to ='blog/images/%Y/%m/%d/', blank=True) #년 월 일로 폴더를 구분해서 접근 시간을 단축시킨다.
     #blank는 비어있어도 경고 없이 실행이 가능하다는 뜻이다.
+    file_upload = models.FileField(upload_to ='blog/files/%Y/%m/%d', blank=True)
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
 
