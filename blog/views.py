@@ -1,5 +1,12 @@
 from django.shortcuts import render
+from django.views.generic import ListView
 from .models import Post
+
+class PostList(ListView):
+    model = Post
+    ordering = '-pk' #CBV로 만든 함수이다. ordering은 제작된 순서로 포스트를 나타낸다.
+    #template_name = 'blog/index.html' #템플릿 네임을 post_list.html에서 index.html로 변경한다.
+                                      #매소드들이 있는데 그 중에 post_list 변수로 html에서 조작해야 한다.
 
 def index(request):
     posts = Post.objects.all().order_by('-pk')      #-pk 최신순
