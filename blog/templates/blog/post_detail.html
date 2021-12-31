@@ -9,7 +9,7 @@
                             <h1 class="fw-bolder mb-1">{{post.title}}</h1>
                             <!-- Post meta content-->
                             <div class="text-muted fst-italic mb-2">{{post.created_at}}</div>
-                            <div class="lead">by<a href="#">작성자명 쓸 위치</a></div>
+                            <div class="lead">by<a href="#">{{ post.author | upper}}</a></div>
                             <!-- Post categories-->
                             <a class="badge bg-secondary text-decoration-none link-light" href="#!">Web Design</a>
                             <a class="badge bg-secondary text-decoration-none link-light" href="#!">Freebies</a>
