@@ -6,4 +6,5 @@ urlpatterns = [
    # path('', views.index),
     path('', views.PostList.as_view()),
     path('<int:pk>/', views.PostDetail.as_view()), #끝에 꼭 /슬래쉬 붙혀주기
+    path('category/<str:slug>/', views.category_page),
 ]

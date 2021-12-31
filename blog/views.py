@@ -35,15 +35,25 @@ def index(request):
             'posts': posts,   #key값은 내가 html에서 사용할 변수이름이고 posts는 값을 불러들인값을 value로 저장할 변수이다.
         }                       #key: value형식이 아닌 하나의 변수만 보내니 오류가 발생한다.
     )
-"""
-def single_post_page(request, pk):
-    post = Post.objects.get(pk=pk)  # .get(pk=pk) 괄호 안에 조건이 만족하는 레코드를 가져온다.
+
+def category_page(request, slug):
+
+    if slug == 'no_category':
+        category = '미분류'
+        post_list = Post.objects.filter(category=None)
+    else:
+        category = Category.objects.get(slug=slug)
+        post_list = Post.objects.filter(category=category)
+
+    #category = Category.objects.get(slug=slug)
 
     return render(
         request,
-        'blog/single_post_page.html',
+        'blog/post_list.html',
         {
-            'post': post,
+            'post_list': post_list,
+            'categories': Category.objects.all(),
+            'no_category_post_count': Post.objects.filter(category=None).count(),
+            'category': category,
         }
     )
-    """
