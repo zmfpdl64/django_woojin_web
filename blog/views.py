@@ -4,6 +4,7 @@ from django.views.generic import DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Post, Category, Tag #지금 있는 폴더에 models.py에서 Post 함수를 가져온다.
 from django.core.exceptions import PermissionDenied #post, get 방식을 사용할 떄 권한이 있는가를 판단한다.
+from django.utils.text import slugify
 
 class PostList(ListView):
     model = Post
@@ -86,13 +87,31 @@ class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView): #Mixin은
         current_user = self.request.user
         if current_user.is_authenticated and (current_user.is_staff or current_user.is_superuser):
             form.instance.author = current_user
-            return super(PostCreate, self).form_valid(form)
+            response = super(PostCreate, self).form_valid(form)
+
+            tags_str = self.request.POST.get('tags_str')
+            if tags_str:
+                tags_str = tags_str.strip() #전달받은 문자열의 왼쪽과 오른쪽에서 제거한다. 인자가 아무것도 없으면 공백을 제거한다.
+
+                tags_str = tags_str.replace(',', ';')
+                tags_list = tags_str.split(';') #;구분자를 기준으로 리스트를 생성한다.
+
+                for t in tags_list:
+                    t = t.strip()
+                    tag, is_tag_created = Tag.objects.get_or_create(name=t)
+                    if is_tag_created:
+                        tag.slug = slugify(t, allow_unicode=True)
+                        tag.save()
+                    self.object.tags.add(tag)
+                
+            return response           
+           # return super(PostCreate, self).form_valid(form)
         else:
             return redirect('/blog/')
 
 class PostUpdate(LoginRequiredMixin, UpdateView):
     model = Post
-    fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category', 'tags']
+    fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category']
 
     template_name = 'blog/post_update_form.html'
 
