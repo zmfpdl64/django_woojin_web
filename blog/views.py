@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views.generic import ListView
 from django.views.generic import DetailView
-from .models import Post, Category #지금 있는 폴더에 models.py에서 Post 함수를 가져온다.
+from .models import Post, Category, Tag #지금 있는 폴더에 models.py에서 Post 함수를 가져온다.
 
 class PostList(ListView):
     model = Post
@@ -55,5 +55,20 @@ def category_page(request, slug):
             'categories': Category.objects.all(),
             'no_category_post_count': Post.objects.filter(category=None).count(),
             'category': category,
+        }
+    )
+
+def tag_page(request, slug):
+    tag = Tag.objects.get(slug=slug)
+    post_list = tag.post_set.all()
+
+    return render(
+        request,
+        'blog/post_list.html',
+        {
+            'post_list': post_list,
+            'tag' : tag,
+            'categories': Category.objects.all(),
+            'no_category_post_count': Post.objects.filter(category=None).count(),
         }
     )
