@@ -8,4 +8,5 @@ urlpatterns = [
     path('<int:pk>/', views.PostDetail.as_view()), #끝에 꼭 /슬래쉬 붙혀주기
     path('category/<str:slug>/', views.category_page),
     path('tag/<str:slug>/', views.tag_page),
+    path('create_post/', views.PostCreate.as_view()),
 ]
