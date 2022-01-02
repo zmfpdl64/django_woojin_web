@@ -78,8 +78,9 @@ def tag_page(request, slug):
     )
 
 class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView): #Mixin은 로그인을 정상적으로 했을 때만 보인다.
-    model = Post
-    fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category']
+    model = Post 
+    fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category'] #화면에 출력되는 필드들 
+    #html에서 사용하는 변수 이름은 form이다. CreateView에서 내제되어있는 함수 또는 변수
 
     def test_func(self):
         return self.request.user.is_superuser or self.request.user.is_staff
