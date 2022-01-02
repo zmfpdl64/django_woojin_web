@@ -1,10 +1,12 @@
 from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 from django.views.generic import DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Post, Category, Tag #지금 있는 폴더에 models.py에서 Post 함수를 가져온다.
 from django.core.exceptions import PermissionDenied #post, get 방식을 사용할 떄 권한이 있는가를 판단한다.
 from django.utils.text import slugify
+from .forms import CommentForm
 
 class PostList(ListView):
     model = Post
@@ -25,6 +27,7 @@ class PostDetail(DetailView):
        context = super(PostDetail, self).get_context_data()
        context['categories'] = Category.objects.all()
        context['no_category_post_count'] = Post.objects.filter(category=None).count() #필터안 조건이 참인 레코드 갯수
+       context['comment_form'] = CommentForm
        return context
 
 def index(request):
@@ -153,3 +156,20 @@ class PostUpdate(LoginRequiredMixin, UpdateView):
                 self.object.tags.add(tag)
 
         return response
+
+def new_comment(request, pk):
+    if request.user.is_authenticated:
+        post = get_object_or_404(Post, pk=pk)
+
+        if request.method == "POST":
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                comment = comment_form.save(commit=False)
+                comment.post = post
+                comment.author = request.user
+                comment.save()
+                return redirect(comment.get_absolute_url())
+        else:
+            return redirect(post.get_absolute_url())
+    else:
+        raise PermissionDenied
