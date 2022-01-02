@@ -17,8 +17,11 @@
                             <div class="text-muted fst-italic mb-2">{{post.created_at}}</div>
                             <div class="lead">by<a href="#">{{ post.author | upper}}</a></div>
                             <!-- Post categories-->
-                            <a class="badge bg-secondary text-decoration-none link-light" href="#!">Web Design</a>
-                            <a class="badge bg-secondary text-decoration-none link-light" href="#!">Freebies</a>
+                            {% if post.tags.exists %}
+                                {% for tag in post.tags.iterator %}
+                            <a class="badge bg-secondary text-decoration-none link-light" href="{{ tag.get_absolute_url }}">{{ tag }}</a>
+                                {% endfor %}
+                            {% endif %}
                             <hr>
                             {% if user.is_authenticated and user == post.author %}
                                 <a class="btn btn-info btn-sm float-right" href="/blog/update_post/{{ post.pk}}/" 

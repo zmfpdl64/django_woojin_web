@@ -12,11 +12,11 @@ class PostList(ListView):
     #template_name = 'blog/index.html' #템플릿 네임을 post_list.html에서 index.html로 변경한다.
      #매소드들이 있는데 그 중에 post_list 변수로 html에서 조작해야 한다.
 
-    def get_context_data(self, **kwargs):
-        context = super(PostList, self).get_context_data()
+    def get_context_data(self, **kwargs): #이렇게 정의되어있는 함수는 무조건 실행이 된다.
+        context = super(PostList, self).get_context_data() #기존의 post_list = self.objects.all() 이라는 함수를 오바라이딩해서 값을 가져온다.
         context['categories'] = Category.objects.all()
         context['no_category_post_count'] = Post.objects.filter(category=None).count()
-        return context                                      
+        return context
 
 class PostDetail(DetailView):
     model = Post
@@ -24,7 +24,7 @@ class PostDetail(DetailView):
     def get_context_data(self, **kwargs):
        context = super(PostDetail, self).get_context_data()
        context['categories'] = Category.objects.all()
-       context['no_category_post_count'] = Post.objects.filter(category=None).count()
+       context['no_category_post_count'] = Post.objects.filter(category=None).count() #필터안 조건이 참인 레코드 갯수
        return context
 
 def index(request):
@@ -63,7 +63,8 @@ def category_page(request, slug):
 
 def tag_page(request, slug):
     tag = Tag.objects.get(slug=slug)
-    post_list = tag.post_set.all()
+    post_list = tag.post_set.all() #post_set으로 tag에 특정 슬러그와 ForeignKey로 연결되어 있는 Post 레코드를 불러올 수 있다.
+    #이때 모델명을 소문자로 쓰고 뒤에 _set을 붙이는 게 기본 설정이다.
 
     return render(
         request,
@@ -83,7 +84,7 @@ class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView): #Mixin은
     def test_func(self):
         return self.request.user.is_superuser or self.request.user.is_staff
 
-    def form_valid(self, form):
+    def form_valid(self, form):#방문자가 폼에 담아 보낸 유효한 정보를 사용해 포스트를 만들고, 이 포스트의 고유 경로로 보내주는 redirect 역할을 한다.
         current_user = self.request.user
         if current_user.is_authenticated and (current_user.is_staff or current_user.is_superuser):
             form.instance.author = current_user
@@ -103,8 +104,8 @@ class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView): #Mixin은
                         tag.slug = slugify(t, allow_unicode=True)
                         tag.save()
                     self.object.tags.add(tag)
-                
-            return response           
+
+            return response
            # return super(PostCreate, self).form_valid(form)
         else:
             return redirect('/blog/')
@@ -115,8 +116,39 @@ class PostUpdate(LoginRequiredMixin, UpdateView):
 
     template_name = 'blog/post_update_form.html'
 
-    def dispatch(self, request, *args, **kwargs):
+    def get_context_data(self, **kwargs):   #기존에 있는 태그들 불러와서 하나의 리스트를 만들어 context에 저장한다.
+        context = super(PostUpdate, self).get_context_data()
+        if self.object.tags.exists():
+            tags_str_list = list()
+            for t in self.object.tags.all():
+                tags_str_list.append(t.name)
+            context['tags_str_default'] = '; '.join(tags_str_list) #리스트를 문자열로 변환
+        return context #기존 tags를 post_update_form.html로 'tags_str_default'라는 key에 넣어서 전달한다.
+
+    def dispatch(self, request, *args, **kwargs):   #지금 로그인 사용자와 작성자와 비교해서 맞으면 실행한다. 또한 글을 쓸 수 있는 권한인지 확인한다.
         if request.user.is_authenticated and request.user == self.get_object().author:
             return super(PostUpdate, self).dispatch(request, *args, **kwargs)
         else:
             raise PermissionDenied
+
+    def form_valid(self, form):
+        response = super(PostUpdate, self).form_valid(form)
+        self.object.tags.clear()
+
+        tags_str = self.request.POST.get('tags_str') #post_update_form에서 보낸 form형식의 name이 tags_str인 input값을 가져온다. 문자열이다.
+        if tags_str:#문자열이 존재한다면 실행
+            tags_str = tags_str.strip() #공백 제거
+            tags_str = tags_str.replace(',', ';') #구분자 ;로 통일
+            tags_list = list()
+            tags_list = tags_str.split(';') #;를 기준으로 리스트 형식으로 저장
+
+            for t in tags_list:
+                t = t.strip()
+                tag, is_tag_created = Tag.objects.get_or_create(name=t)#기존 Tag Db에서 name이 t인 레코드 가져온다 존재하면 tag에 레코드 주입
+                #없으면 is_tag_created에는 false가 들어간다.
+                if is_tag_created: #is_tag_created가 참이면
+                    tag.slug = slugify(t, allow_unicode=True) #tag.slug에 slugify를 통해 slug형식으로 변환해 tag.slug에 저장한다.
+                    tag.save()  #이후 db를 저장한다.
+                self.object.tags.add(tag)
+
+        return response
