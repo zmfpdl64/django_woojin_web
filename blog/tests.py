@@ -1,7 +1,7 @@
 
 from django.test import TestCase, Client
 from bs4 import BeautifulSoup
-from .models import Post, Category, Tag
+from .models import Post, Category, Tag, Comment
 from django.contrib.auth.models import User
 
 
@@ -47,6 +47,12 @@ class TextView(TestCase):
 
         self.post_003.tags.add(self.tag_python_kor)
         self.post_003.tags.add(self.tag_python)
+
+        self.comment_001 = Comment.objects.create(
+            post=self.post_001,
+            author=self.user_obama,
+            content = '첫 번째 댓글입니다.'
+        )
 
     def category_card_test(self, soup):
         categories_card= soup.find('div', id='categories-card')
@@ -104,6 +110,10 @@ class TextView(TestCase):
  #   def test_post_detail(self):
  #       self.assertIn(self.post_001.content, post_area.text)
 
+    def test_post_detail(self):
+        response = self.client.get(self.post_001.get_absolute_url())
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
 
 
     def navbar_test(self, soup):
