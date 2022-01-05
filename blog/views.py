@@ -13,6 +13,7 @@ class PostList(ListView):
     ordering = '-pk' #CBV로 만든 함수이다. ordering은 제작된 순서로 포스트를 나타낸다.
     #template_name = 'blog/index.html' #템플릿 네임을 post_list.html에서 index.html로 변경한다.
      #매소드들이 있는데 그 중에 post_list 변수로 html에서 조작해야 한다.
+    paginate_by = 5
 
     def get_context_data(self, **kwargs): #이렇게 정의되어있는 함수는 무조건 실행이 된다.
         context = super(PostList, self).get_context_data() #기존의 post_list = self.objects.all() 이라는 함수를 오바라이딩해서 값을 가져온다.
