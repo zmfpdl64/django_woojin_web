@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 from django.views.generic import DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from .models import Post, Category, Tag #지금 있는 폴더에 models.py에서 Post 함수를 가져온다.
+from .models import Comment, Post, Category, Tag #지금 있는 폴더에 models.py에서 Post 함수를 가져온다.
 from django.core.exceptions import PermissionDenied #post, get 방식을 사용할 떄 권한이 있는가를 판단한다.
 from django.utils.text import slugify
 from .forms import CommentForm
@@ -173,3 +173,13 @@ def new_comment(request, pk):
             return redirect(post.get_absolute_url())
     else:
         raise PermissionDenied
+
+class CommentUpdate(LoginRequiredMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user == self.get_object().author:
+            return super(CommentUpdate, self).dispatch(request, *args, **kwargs)
+        else:
+            raise PermissionDenied
