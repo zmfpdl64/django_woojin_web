@@ -57,9 +57,7 @@
                         {% endif %}
                         <hr>
                     </div>
-                    <div id="comment-area">
-
-                    
+                    <div id="comment-area">                    
                     <!-- Comments section-->
                     <section class="mb-5">
                         <div class="card bg-light">
@@ -81,7 +79,7 @@
                                     {% for comment in post.comment_set.iterator %}
                                 <!-- Single comment-->
                                     <div class="media mb-4" id="comment-{{ comment.pk }}">
-                                        <div class="flex-shrink-0"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>
+                                        <div class="flex-shrink-0"><img class="rounded-circle" src="{{ comment.get_avatar_url }}" alt="{{ comment.author }}" width="60px"/></div>
                                         <div class="media-body">
                                             <div class="fw-bold">
                                                 {% if user.is_authenticated and comment.author == user %}
@@ -124,13 +122,12 @@
                                                 
                                                 </div>                                                
                                             
-                                        </div>
+                                            </div>                                       
                                     </div>
-                                </div>
-                                {% endfor %}
+                                    {% endfor %}
                                 {% endif %}
                             </div>
 
-                    </section>
-                </div>
+                         </section>
+                     </div>
 {% endblock %}
