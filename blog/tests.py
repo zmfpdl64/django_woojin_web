@@ -347,4 +347,56 @@ def test_comment_update(self):
     update_comment_form = soup.find('form', id='comment-form')
     content_textarea = update_comment_form.find('textarea', id='id_content')
     self.assertIn(self.comment_001.content, content_textarea.text)
+
+
+def test_delete_comment(self):
+    comment_by_trump = Comment.object.create(
+        post=self.post_001,
+        author=self.user_trump,
+        content='트럼프의 댓글입니다.',
+    )
+
+    self.assertEqual(Comment.objects.count(), 2)
+    self.assertEqual(self.post_001.comment_set.count(), 2)
+
+    #로그인하지 않은 상태
+    response = self.client.get(self.post_001.get_absolute_url())
+    self.assertEqual(response.status_code, 200)
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    comment_area = soup.find('div', id='comment-area')
+    self.assertFalse(comment_area.find('a', id="comment-1-delete-btn"))
+    self.assertFalse(comment_area.find('a', id="comment-2-delete-btn"))
+
+    #trump으로 로그인한 상태
+    self.client.login(username='trump', password='somepassword')
+    response = self.client.get(self.post_001.get_absolute_url())
+    self.assertEqual(response.status_code, 200)
+
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    comment_area = soup.find('div', id="comment-area")
+    self.assertFalse(comment_area.find('a', id="comment-1-delete-btn"))
+    comment_002_delete_modal_btn = comment_area.find( 'a', id="comment-2-delete-btn")
+    self.assertIn('delete', comment_002_delete_modal_btn)
+    self.assertEqual(comment_002_delete_modal_btn.attrs['data-target'], '#deleteCommentModal-2')
+
+    delete_comment_modal_002 = soup.find('div', id='deleteCommentModal-2')
+    self.assertIn('Are You Sure?', delete_comment_modal_002.text)
+    really_delete_btn_002 = delete_comment_modal_002.find('a')
+    self.assertIn('Delete', really_delete_btn_002.text)
+    self.assertEqual(
+        really_delete_btn_002.attrs['href'],
+        '/blog/delete_comment/2/'
+    )
+
+    response = self.client.get('/blog/delete_comment/2/', follow=True)
+    self.assertEqual(response.status_code, 200)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    self.assertIn(self.post_001.title, soup.title.text)
+    comment_area = soup.find('div', id="comment-area")
+    self.assertIn("트럼프의 댓글입니다.", comment_area.text)
+
+    self.assertEqual(Comment.objects.count(), 1)
+    self.assertEqual(self.post_001.comment_set.count(), 1)
     
